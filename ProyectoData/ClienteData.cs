@@ -4,7 +4,6 @@ using Microsoft.Extensions.Configuration;
 using ProyectoModelo;
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 
 namespace ProyectoData
 {
@@ -20,8 +19,8 @@ namespace ProyectoData
         public IEnumerable<Cliente> GetAll()
         {
             var list = new List<Cliente>();
-            using var conn = new System.Data.SqlClient.SqlConnection(_connectionString);
-            using var cmd = new System.Data.SqlClient.SqlCommand("SELECT IdCliente, Identificacion, Nombres, Apellidos, Direccion, Telefono, FechaRegistro FROM Cliente", conn);
+            using var conn = new SqlConnection(_connectionString);
+            using var cmd = new SqlCommand("SELECT IdCliente, Identificacion, Nombres, Apellidos, Direccion, Telefono, FechaRegistro FROM Cliente", conn);
             conn.Open();
             using var rdr = cmd.ExecuteReader();
             while (rdr.Read())
@@ -42,8 +41,8 @@ namespace ProyectoData
 
         public Cliente? GetById(int id)
         {
-            using var conn = new System.Data.SqlClient.SqlConnection(_connectionString);
-            using var cmd = new System.Data.SqlClient.SqlCommand("SELECT IdCliente, Identificacion, Nombres, Apellidos, Direccion, Telefono, FechaRegistro FROM Cliente WHERE IdCliente = @id", conn);
+            using var conn = new SqlConnection(_connectionString);
+            using var cmd = new SqlCommand("SELECT IdCliente, Identificacion, Nombres, Apellidos, Direccion, Telefono, FechaRegistro FROM Cliente WHERE IdCliente = @id", conn);
             cmd.Parameters.AddWithValue("@id", id);
             conn.Open();
             using var rdr = cmd.ExecuteReader();
@@ -62,11 +61,11 @@ namespace ProyectoData
             }
             return null;
         }
-
+                
         public int Create(Cliente cliente)
         {
-            using var conn = new System.Data.SqlClient.SqlConnection(_connectionString);
-            using var cmd = new System.Data.SqlClient.SqlCommand(@"
+            using var conn = new SqlConnection(_connectionString);
+            using var cmd = new SqlCommand(@"
                 INSERT INTO Cliente (Identificacion, Nombres, Apellidos, Direccion, Telefono)
                 VALUES (@ident, @nombres, @apellidos, @direccion, @telefono);
                 SELECT SCOPE_IDENTITY();", conn);
@@ -84,8 +83,8 @@ namespace ProyectoData
         // Actualiza un cliente existente
         public bool Update(Cliente cliente)
         {
-            using var conn = new System.Data.SqlClient.SqlConnection(_connectionString);
-            using var cmd = new System.Data.SqlClient.SqlCommand(@"
+            using var conn = new SqlConnection(_connectionString);
+            using var cmd = new SqlCommand(@"
                 UPDATE Cliente
                 SET Identificacion = @Identificacion,
                     Nombres = @Nombres,
@@ -106,8 +105,8 @@ namespace ProyectoData
         // Elimina un cliente por id
         public bool Delete(int idCliente)
         {
-            using var conn = new System.Data.SqlClient.SqlConnection(_connectionString);
-            using var cmd = new System.Data.SqlClient.SqlCommand("DELETE FROM Cliente WHERE IdCliente = @Id", conn);
+            using var conn = new SqlConnection(_connectionString);
+            using var cmd = new SqlCommand("DELETE FROM Cliente WHERE IdCliente = @Id", conn);
             cmd.Parameters.AddWithValue("@Id", idCliente);
             conn.Open();
             return cmd.ExecuteNonQuery() > 0;
