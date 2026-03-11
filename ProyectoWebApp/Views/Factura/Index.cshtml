@@ -1,0 +1,107 @@
+﻿@model IEnumerable<System.Text.Json.JsonElement>
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "Facturas";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+<div class="container py-4">
+    <h2>Listado de facturas</h2>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <p>
+        <a class="btn btn-primary" href="/Factura/Create">Crear nueva factura</a>
+    </p>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Mesero</th>
+                <th>Total</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var f in Model ?? Enumerable.Empty<System.Text.Json.JsonElement>())
+            {
+                // intento de obtener campos comunes; ajusta si tus nombres son distintos
+                int nro = 0;
+                string fecha = "";
+                string cliente = "";
+                string mesero = "";
+                decimal total = 0m;
+
+                if (f.TryGetProperty("nroFactura", out var pNro) || f.TryGetProperty("id", out pNro) || f.TryGetProperty("idFactura", out pNro))
+                {
+                    nro = pNro.ValueKind == JsonValueKind.Number ? pNro.GetInt32() : 0;
+                }
+
+                if (f.TryGetProperty("fecha", out var pFecha))
+                {
+                    fecha = pFecha.GetString() ?? "";
+                }
+                else if (f.TryGetProperty("fechaRegistro", out var pFecha2))
+                {
+                    fecha = pFecha2.GetString() ?? "";
+                }
+
+                if (f.TryGetProperty("cliente", out var pCliente))
+                {
+                    var nombres = pCliente.TryGetProperty("nombres", out var pn) ? pn.GetString() : null;
+                    var apellidos = pCliente.TryGetProperty("apellidos", out var pa) ? pa.GetString() : null;
+                    cliente = $"{nombres ?? ""} {apellidos ?? ""}".Trim();
+                }
+                else
+                {
+                    // intento propiedades sueltas
+                    var cn = f.TryGetProperty("clienteNombre", out var cnom) ? cnom.GetString() : null;
+                    cliente = cn ?? "";
+                }
+
+                if (f.TryGetProperty("mesero", out var pMesero))
+                {
+                    var mn = pMesero.TryGetProperty("nombres", out var mnn) ? mnn.GetString() : null;
+                    var ma = pMesero.TryGetProperty("apellidos", out var mpa) ? mpa.GetString() : null;
+                    mesero = $"{mn ?? ""} {ma ?? ""}".Trim();
+                }
+
+                // calcular total por lineas si vienen
+                if (f.TryGetProperty("lineas", out var pLineas) && pLineas.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var li in pLineas.EnumerateArray())
+                    {
+                        decimal precio = 0m;
+                        int cantidad = 1;
+                        if (li.TryGetProperty("precio", out var pPrecio) && pPrecio.ValueKind == JsonValueKind.Number) precio = pPrecio.GetDecimal();
+                        if (li.TryGetProperty("cantidad", out var pCant) && pCant.ValueKind == JsonValueKind.Number) cantidad = pCant.GetInt32();
+                        total += precio * cantidad;
+                    }
+                }
+            <tr>
+                <td>@nro</td>
+                <td>@fecha</td>
+                <td>@cliente</td>
+                <td>@mesero</td>
+                <td>@total.ToString("C")</td>
+                <td>
+                    <a class="btn btn-sm btn-secondary" href="/Factura/Create?facturaId=@nro">Editar</a>
+
+                    <form method="post" action="/Factura/Delete" style="display:inline;" onsubmit="return confirm('¿Eliminar factura #@nro?');">
+                        <input type="hidden" name="id" value="@nro" />
+                        <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>
