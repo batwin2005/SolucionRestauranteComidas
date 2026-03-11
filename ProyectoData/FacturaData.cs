@@ -11,7 +11,88 @@ namespace ProyectoData
     {
         private readonly string _conn;
         public FacturaData(IConfiguration config) => _conn = config.GetConnectionString("CadenaSQL");
+        // ProyectoData/FacturaData.cs (añadir estos métodos a la clase FacturaData existente)
+        public void UpdateFactura(Factura factura)
+        {
+            using var conn = new SqlConnection(_conn);
+            conn.Open();
+            using var tran = conn.BeginTransaction();
+            try
+            {
+                // 1) Actualizar cabecera
+                var cmdUpd = new SqlCommand(@"
+            UPDATE Factura
+            SET IdCliente = @IdCliente,
+                IdMesero = @IdMesero,
+                IdMesa = @IdMesa,
+                Fecha = @Fecha
+            WHERE NroFactura = @NroFactura", conn, tran);
+                cmdUpd.Parameters.AddWithValue("@IdCliente", factura.IdCliente);
+                cmdUpd.Parameters.AddWithValue("@IdMesero", factura.IdMesero);
+                cmdUpd.Parameters.AddWithValue("@IdMesa", (object?)factura.IdMesa ?? DBNull.Value);
+                cmdUpd.Parameters.AddWithValue("@Fecha", factura.Fecha);
+                cmdUpd.Parameters.AddWithValue("@NroFactura", factura.NroFactura);
+                var rows = cmdUpd.ExecuteNonQuery();
+                if (rows == 0) throw new InvalidOperationException("Factura no encontrada.");
 
+                // 2) Eliminar detalles existentes (si los vas a reemplazar)
+                var cmdDelDet = new SqlCommand("DELETE FROM DetalleFactura WHERE NroFactura = @Nro", conn, tran);
+                cmdDelDet.Parameters.AddWithValue("@Nro", factura.NroFactura);
+                cmdDelDet.ExecuteNonQuery();
+
+                // 3) Insertar nuevos detalles y calcular total
+                decimal total = 0m;
+                if (factura.Detalles != null)
+                {
+                    foreach (var d in factura.Detalles)
+                    {
+                        var cmdInsDet = new SqlCommand(@"
+                    INSERT INTO DetalleFactura (NroFactura, Plato, Cantidad, ValorUnitario)
+                    VALUES (@NroFactura,@Plato,@Cantidad,@ValorUnitario);", conn, tran);
+                        cmdInsDet.Parameters.AddWithValue("@NroFactura", factura.NroFactura);
+                        cmdInsDet.Parameters.AddWithValue("@Plato", d.Plato);
+                        cmdInsDet.Parameters.AddWithValue("@Cantidad", d.Cantidad);
+                        cmdInsDet.Parameters.AddWithValue("@ValorUnitario", d.ValorUnitario);
+                        cmdInsDet.ExecuteNonQuery();
+                        total += d.Cantidad * d.ValorUnitario;
+                    }
+                }
+
+                // 4) Actualizar total
+                var cmdUpdTotal = new SqlCommand("UPDATE Factura SET Total = @Total WHERE NroFactura = @Nro", conn, tran);
+                cmdUpdTotal.Parameters.AddWithValue("@Total", total);
+                cmdUpdTotal.Parameters.AddWithValue("@Nro", factura.NroFactura);
+                cmdUpdTotal.ExecuteNonQuery();
+
+                tran.Commit();
+            }
+            catch
+            {
+                tran.Rollback();
+                throw;
+            }
+        }
+
+        public bool DeleteFactura(int nroFactura)
+        {
+            using var conn = new SqlConnection(_conn);
+            conn.Open();
+            using var tran = conn.BeginTransaction();
+            try
+            {
+                // Si la FK DetalleFactura tiene ON DELETE CASCADE, basta con borrar la factura.
+                var cmd = new SqlCommand("DELETE FROM Factura WHERE NroFactura = @Nro", conn, tran);
+                cmd.Parameters.AddWithValue("@Nro", nroFactura);
+                var affected = cmd.ExecuteNonQuery();
+                tran.Commit();
+                return affected > 0;
+            }
+            catch
+            {
+                tran.Rollback();
+                throw;
+            }
+        }
         public int CreateFactura(Factura factura)
         {
             using var conn = new SqlConnection(_conn);

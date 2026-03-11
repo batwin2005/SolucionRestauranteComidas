@@ -38,5 +38,21 @@ namespace ProyectoWebAPI.Controllers
             cliente.IdCliente = id;
             return CreatedAtAction(nameof(Get), new { id }, cliente);
         }
+
+        [HttpPut("{id:int}")]
+        public IActionResult Put(int id, [FromBody] Cliente cliente)
+        {
+            if (cliente == null || cliente.IdCliente != id) return BadRequest();
+            var ok = _clienteData.Update(cliente);
+            return ok ? NoContent() : NotFound();
+        }
+
+        [HttpDelete("{id:int}")]
+        public IActionResult Delete(int id)
+        {
+            var ok = _clienteData.Delete(id);
+            return ok ? NoContent() : NotFound();
+        }
+
     }
 }

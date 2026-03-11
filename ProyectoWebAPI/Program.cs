@@ -10,7 +10,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.Configure<ConnectionStrings>(builder.Configuration.GetSection("CadenaSQL"));
-builder.Services.AddSingleton<EmpleadoData>();
+
 
 //builder.Services.AddSingleton<ClienteData>();
 builder.Services.AddTransient<FacturaData>();
