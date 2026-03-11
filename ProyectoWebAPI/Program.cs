@@ -11,7 +11,11 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.Configure<ConnectionStrings>(builder.Configuration.GetSection("CadenaSQL"));
 builder.Services.AddSingleton<EmpleadoData>();
-builder.Services.AddSingleton<ClienteData>();
+
+//builder.Services.AddSingleton<ClienteData>();
+builder.Services.AddTransient<FacturaData>();
+builder.Services.AddTransient<ReportesData>();
+builder.Services.AddTransient<ClienteData>(); // si ya existe
 
 var app = builder.Build();
 
