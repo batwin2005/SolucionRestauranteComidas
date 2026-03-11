@@ -1,37 +1,47 @@
-using Fluent.Infrastructure.FluentModel;
+using Microsoft.EntityFrameworkCore;
 using ProyectoData;
+using ProyectoServices;
+using ProyectoServices.Implementaciones;
+using ProyectoWebAPI.Data;
 
-var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.Configure<ConnectionStrings>(builder.Configuration.GetSection("CadenaSQL"));
-
-builder.Services.AddTransient<ClienteData>();
-builder.Services.AddTransient<FacturaData>();
-builder.Services.AddTransient<ReportesData>();
-builder.Services.AddTransient<ClienteData>(); 
-builder.Services.AddTransient<PlatoData>();
-// Registrar acceso a datos y servicio
-builder.Services.AddTransient<ProyectoData.MeseroData>();
-builder.Services.AddScoped<ProyectoServices.IMeseroService, ProyectoServices.Implementaciones.MeseroService>();
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+namespace ProyectoWebAPI
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            var builder = WebApplication.CreateBuilder(args);
+
+            // Add services to the container.
+            builder.Services.AddControllers();
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
+
+            // Configuración de EF Core con SQL Server
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("CadenaSQL")));
+
+            // Registrar acceso a datos y servicios
+            builder.Services.AddTransient<ClienteData>();
+            builder.Services.AddTransient<FacturaData>();
+            builder.Services.AddTransient<ReportesData>();
+            builder.Services.AddTransient<PlatoData>();
+            builder.Services.AddTransient<MeseroData>();
+
+            builder.Services.AddScoped<IMeseroService, MeseroService>();
+
+            var app = builder.Build();
+
+            // Configure the HTTP request pipeline.
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
+
+            app.UseAuthorization();
+            app.MapControllers();
+            app.Run();
+        }
+    }
 }
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
