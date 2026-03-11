@@ -17,6 +17,12 @@ builder.Services.AddTransient<FacturaData>();
 builder.Services.AddTransient<ReportesData>();
 builder.Services.AddTransient<ClienteData>(); // si ya existe
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -27,6 +33,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseAuthorization();
+
+app.UseCors();
 
 app.MapControllers();
 
