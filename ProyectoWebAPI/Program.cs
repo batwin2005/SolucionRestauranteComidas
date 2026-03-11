@@ -1,30 +1,29 @@
-using Microsoft.Data.SqlClient;
-using System.Data.SqlClient;
+using ProyectoData;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ... otros servicios
+// Add services to the container.
+
+builder.Services.AddControllers();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+builder.Services.Configure<ConnectionStrings>(builder.Configuration.GetSection("CadenaSQL"));
+builder.Services.AddSingleton<EmpleadoData>();
+builder.Services.AddSingleton<ClienteData>();
+
 var app = builder.Build();
 
-// Comprobación de conexión
-try
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
 {
-    var connString = app.Configuration.GetConnectionString("CadenaSQL"); // o "DefaultConnection"
-    using (var conn = new System.Data.SqlClient.SqlConnection(connString))
-    {
-        conn.Open();
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("Éxito: Conexión a RestauranteDB establecida.");
-        Console.ResetColor();
-    }
-}
-catch (Exception ex)
-{
-    Console.ForegroundColor = ConsoleColor.Red;
-    Console.WriteLine("Fracaso: No se pudo conectar a RestauranteDB.");
-    Console.WriteLine(ex.Message);
-    Console.ResetColor();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
+app.UseAuthorization();
+
 app.MapControllers();
+
 app.Run();

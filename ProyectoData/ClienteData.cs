@@ -15,7 +15,7 @@ namespace ProyectoData
 
         public ClienteData(IConfiguration configuration)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection");
+            _connectionString = configuration.GetConnectionString("CadenaSQL");
         }
 
         public IEnumerable<Cliente> GetAll()
