@@ -12,16 +12,14 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.Configure<ConnectionStrings>(builder.Configuration.GetSection("CadenaSQL"));
 
-
-
 builder.Services.AddTransient<ClienteData>();
 builder.Services.AddTransient<FacturaData>();
 builder.Services.AddTransient<ReportesData>();
 builder.Services.AddTransient<ClienteData>(); 
 builder.Services.AddTransient<PlatoData>();
-
-//builder.Services.AddScoped<IMeseroService, MeseroService>();
-//builder.Services.AddScoped<IPlatoService, PlatoService>();
+// Registrar acceso a datos y servicio
+builder.Services.AddTransient<ProyectoData.MeseroData>();
+builder.Services.AddScoped<ProyectoServices.IMeseroService, ProyectoServices.Implementaciones.MeseroService>();
 
 var app = builder.Build();
 

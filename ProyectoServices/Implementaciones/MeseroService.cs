@@ -1,42 +1,39 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using ProyectoModelo;
-using ProyectoWebAPI.Data;
+using ProyectoData;
 
-public class MeseroService : IMeseroService
+namespace ProyectoServices.Implementaciones
 {
-    private readonly ApplicationDbContext _context;
-
-    public MeseroService(ApplicationDbContext context)
+    public class MeseroService : IMeseroService
     {
-        _context = context;
-    }
+        private readonly MeseroData _meseroData;
 
-    public async Task<IEnumerable<Mesero>> GetAllAsync()
-        => await _context.Meseros.ToListAsync();
+        public MeseroService(MeseroData meseroData)
+        {
+            _meseroData = meseroData;
+        }
 
-    public async Task<Mesero?> GetByIdAsync(int id)
-        => await _context.Meseros.FindAsync(id);
+        public Task<IEnumerable<Mesero>> GetAllAsync()
+            => Task.FromResult(_meseroData.GetAll());
 
-    public async Task<Mesero> CreateAsync(Mesero mesero)
-    {
-        _context.Meseros.Add(mesero);
-        await _context.SaveChangesAsync();
-        return mesero;
-    }
+        public Task<Mesero?> GetByIdAsync(int id)
+            => Task.FromResult(_meseroData.GetById(id));
 
-    public async Task<Mesero> UpdateAsync(Mesero mesero)
-    {
-        _context.Meseros.Update(mesero);
-        await _context.SaveChangesAsync();
-        return mesero;
-    }
+        public Task<Mesero> CreateAsync(Mesero mesero)
+        {
+            var id = _meseroData.Create(mesero);
+            mesero.IdMesero = id;
+            return Task.FromResult(mesero);
+        }
 
-    public async Task<bool> DeleteAsync(int id)
-    {
-        var mesero = await _context.Meseros.FindAsync(id);
-        if (mesero == null) return false;
-        _context.Meseros.Remove(mesero);
-        await _context.SaveChangesAsync();
-        return true;
+        public Task<Mesero> UpdateAsync(Mesero mesero)
+        {
+            _meseroData.Update(mesero);
+            return Task.FromResult(mesero);
+        }
+
+        public Task<bool> DeleteAsync(int id)
+            => Task.FromResult(_meseroData.Delete(id));
     }
 }
