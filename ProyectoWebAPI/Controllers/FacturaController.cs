@@ -31,7 +31,6 @@ namespace ProyectoWebAPI.Controllers
         [HttpGet("{id:int}")]
         public IActionResult GetById(int id)
         {
-            // Implementar si necesitas detalle por id
             return NotFound();
         }
     }

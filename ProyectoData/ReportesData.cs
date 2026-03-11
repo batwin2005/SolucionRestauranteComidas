@@ -10,9 +10,9 @@ namespace ProyectoData
         private readonly string _conn;
         public ReportesData(IConfiguration config) => _conn = config.GetConnectionString("CadenaSQL");
 
-        public IEnumerable<dynamic> VentasPorMesero(DateTime desde, DateTime hasta)
+        public IEnumerable<object> VentasPorMesero(DateTime desde, DateTime hasta)
         {
-            var list = new List<dynamic>();
+            var list = new List<object>();
             using var conn = new SqlConnection(_conn);
             using var cmd = new SqlCommand(@"
                 SELECT m.IdMesero, m.Nombres, m.Apellidos, ISNULL(SUM(f.Total),0) AS TotalVendido
@@ -37,9 +37,9 @@ namespace ProyectoData
             return list;
         }
 
-        public IEnumerable<dynamic> ClientesPorConsumo(decimal minimo, DateTime desde, DateTime hasta)
+        public IEnumerable<object> ClientesPorConsumo(decimal minimo, DateTime desde, DateTime hasta)
         {
-            var list = new List<dynamic>();
+            var list = new List<object>();
             using var conn = new SqlConnection(_conn);
             using var cmd = new SqlCommand(@"
                 SELECT c.IdCliente, c.Nombres, c.Apellidos, ISNULL(SUM(f.Total),0) AS TotalConsumo
@@ -66,7 +66,7 @@ namespace ProyectoData
             return list;
         }
 
-        public dynamic ProductoMasVendido(int anio, int mes)
+        public object ProductoMasVendido(int anio, int mes)
         {
             using var conn = new SqlConnection(_conn);
             using var cmd = new SqlCommand(@"

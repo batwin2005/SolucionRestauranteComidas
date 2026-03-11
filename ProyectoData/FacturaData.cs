@@ -26,7 +26,7 @@ namespace ProyectoData
                 cmd.Parameters.AddWithValue("@IdCliente", factura.IdCliente);
                 cmd.Parameters.AddWithValue("@IdMesero", factura.IdMesero);
                 cmd.Parameters.AddWithValue("@IdMesa", (object?)factura.IdMesa ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@Fecha", factura.Fecha);
+                cmd.Parameters.AddWithValue("@Fecha", factura.Fecha == default ? DateTime.UtcNow : factura.Fecha);
                 cmd.Parameters.AddWithValue("@Total", 0m);
                 var id = Convert.ToInt32(cmd.ExecuteScalar());
 
