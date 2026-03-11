@@ -1,3 +1,4 @@
+using Fluent.Infrastructure.FluentModel;
 using ProyectoData;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,10 +13,15 @@ builder.Services.AddSwaggerGen();
 builder.Services.Configure<ConnectionStrings>(builder.Configuration.GetSection("CadenaSQL"));
 
 
-//builder.Services.AddSingleton<ClienteData>();
+
+builder.Services.AddTransient<ClienteData>();
 builder.Services.AddTransient<FacturaData>();
 builder.Services.AddTransient<ReportesData>();
-builder.Services.AddTransient<ClienteData>(); // si ya existe
+builder.Services.AddTransient<ClienteData>(); 
+builder.Services.AddTransient<PlatoData>();
+
+//builder.Services.AddScoped<IMeseroService, MeseroService>();
+//builder.Services.AddScoped<IPlatoService, PlatoService>();
 
 var app = builder.Build();
 
