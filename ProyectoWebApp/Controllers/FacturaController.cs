@@ -22,23 +22,23 @@ namespace ProyectoWebApp.Controllers
         // GET Create: construye y devuelve el ViewModel esperado por la vista
         public async Task<IActionResult> Create()
         {
-            var vm = new FacturaCreateViewModel { Fecha = DateTime.Now, Clientes = Enumerable.Empty<Cliente>(), Meseros = Enumerable.Empty<Mesero>(), Platos = Enumerable.Empty<Plato>() };
+            var vm = new FacturaCreateViewModel { Fecha = DateTime.Now, Clientes = (IEnumerable<Cliente>)[], Meseros = (IEnumerable<Mesero>)[], Platos = (IEnumerable<Plato>)[] };
 
             try
             {
                 var client = _httpFactory.CreateClient("Api");
-                vm.Clientes = await client.GetFromJsonAsync<IEnumerable<Cliente>>("api/cliente") ?? Enumerable.Empty<Cliente>();
-                vm.Meseros = await client.GetFromJsonAsync<IEnumerable<Mesero>>("api/mesero") ?? Enumerable.Empty<Mesero>();
-                vm.Platos = await client.GetFromJsonAsync<IEnumerable<Plato>>("api/plato") ?? Enumerable.Empty<Plato>();
+                vm.Clientes = await client.GetFromJsonAsync<IEnumerable<Cliente>>("api/cliente") ?? [];
+                vm.Meseros = await client.GetFromJsonAsync<IEnumerable<Mesero>>("api/mesero") ?? [];
+                vm.Platos = await client.GetFromJsonAsync<IEnumerable<Plato>>("api/plato") ?? [];
             }
-                catch (HttpRequestException ex)
+            catch (HttpRequestException ex)
             {
                 _logger.LogError(ex, "No se pudo conectar con la API para poblar el formulario de creación de factura.");
                 TempData["ErrorMessage"] = "No se pudo conectar con el servicio de API. Comprueba que el proyecto de API esté en ejecución y la URL en 'ApiBaseUrl'.";
             }
 
             return View(vm);
-        }   
+        }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] FacturaCreateViewModel payload)

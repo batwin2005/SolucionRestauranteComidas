@@ -12,7 +12,7 @@ namespace ProyectoWebApp.Models
         public IEnumerable<Plato>? Platos { get; set; }
 
         // Detalles de la factura
-        public List<FacturaLineaViewModel> Lineas { get; set; } = new();
+        public List<FacturaLineaViewModel> Lineas { get; set; } = [];
     }
 
     public class FacturaLineaViewModel

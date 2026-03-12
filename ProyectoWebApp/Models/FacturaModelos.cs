@@ -39,4 +39,16 @@
         public int PlatoId { get; set; }
         public int Cantidad { get; set; }
     }
+
+    // DTO usado por el controlador API (Create/Get)
+    public class FacturaModel
+    {
+        public int Id { get; set; }
+        public int ClienteId { get; set; }
+        public string ClienteNombre { get; set; }
+        public int MeseroId { get; set; }
+        public DateTime Fecha { get; set; }
+        public decimal Total { get; set; }
+        public List<LineaFactura> Lineas { get; set; }
+    }
 }
