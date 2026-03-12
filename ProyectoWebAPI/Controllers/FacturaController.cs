@@ -12,10 +12,24 @@ namespace ProyectoWebAPI.Controllers
         public FacturaController(FacturaData data) => _data = data;
 
         [HttpPost]
-        public IActionResult Post([FromBody] Factura factura)
+        public IActionResult Post([FromBody] FacturaCreateDto dto)
         {
-            if (factura == null || factura.Detalles == null || factura.Detalles.Count == 0)
+            if (dto == null || dto.Lineas == null || dto.Lineas.Count == 0)
                 return BadRequest("Factura o detalles inválidos.");
+
+            var factura = new Factura
+            {
+                IdCliente = dto.ClienteId,
+                IdMesero = dto.MeseroId,
+                IdMesa = null,
+                Fecha = dto.Fecha,
+                Detalles = dto.Lineas.Select(l => new DetalleFactura
+                {
+                    Plato = l.PlatoId,
+                    Cantidad = l.Cantidad,
+                    ValorUnitario = l.Precio
+                }).ToList()
+            };
 
             var id = _data.CreateFactura(factura);
             return CreatedAtAction(nameof(GetById), new { id }, new { NroFactura = id });
@@ -32,6 +46,22 @@ namespace ProyectoWebAPI.Controllers
         public IActionResult GetById(int id)
         {
             return NotFound();
+        }
+
+
+        public class FacturaCreateDto
+        {
+            public int ClienteId { get; set; }
+            public int MeseroId { get; set; }
+            public DateTime Fecha { get; set; }
+            public List<FacturaLineaDto> Lineas { get; set; } = new();
+        }
+
+        public class FacturaLineaDto
+        {
+            public int PlatoId { get; set; }
+            public int Cantidad { get; set; }
+            public decimal Precio { get; set; }
         }
     }
 }
