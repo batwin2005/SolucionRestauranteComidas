@@ -42,7 +42,7 @@ namespace ProyectoWebApp.Controllers
                 var client = _httpFactory.CreateClient("Api");
 
                 vm.Clientes = await client.GetFromJsonAsync<IEnumerable<Cliente>>("api/cliente") ?? Enumerable.Empty<Cliente>();
-                vm.Meseros = await client.GetFromJsonAsync<IEnumerable<Mesero>>("api/mesero") ?? Enumerable.Empty<Mesero>(); 
+                vm.Meseros = await client.GetFromJsonAsync<IEnumerable<Mesero>>("api/mesero") ?? Enumerable.Empty<Mesero>();
                 vm.Platos = await client.GetFromJsonAsync<IEnumerable<Plato>>("api/plato") ?? Enumerable.Empty<Plato>();
             }
             catch (HttpRequestException ex)
@@ -55,9 +55,9 @@ namespace ProyectoWebApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(FacturaCreateViewModel payload)
+        public async Task<IActionResult> Create([FromBody] FacturaCreateViewModel payload)
         {
-            if (payload == null)
+            if (payload == null || payload.ClienteId == 0 || payload.MeseroId == 0 || payload.Lineas == null || !payload.Lineas.Any())
             {
                 TempData["ErrorMessage"] = "Datos de factura inválidos.";
                 return BadRequest();
@@ -72,7 +72,7 @@ namespace ProyectoWebApp.Controllers
                     clienteId = payload.ClienteId,
                     meseroId = payload.MeseroId,
                     fecha = payload.Fecha,
-                    lineas = payload.Lineas?.Select(l => new { platoId = l.PlatoId, cantidad = l.Cantidad }).ToArray()
+                    lineas = payload.Lineas.Select(l => new { platoId = l.PlatoId, cantidad = l.Cantidad, precio = l.Precio }).ToArray()
                 };
 
                 var resp = await client.PostAsJsonAsync("api/factura", apiPayload);

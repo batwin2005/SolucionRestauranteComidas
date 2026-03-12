@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using ProyectoWebApp.Models;
+using ProyectoData;
+using ProyectoModelo;
 
 namespace ProyectoWebApp.Controllers.Api
 {
@@ -7,19 +8,54 @@ namespace ProyectoWebApp.Controllers.Api
     [Route("api/[controller]")]
     public class FacturaController : ControllerBase
     {
-        [HttpPost]
-        public IActionResult Create([FromBody] FacturaModel model)
+        private readonly FacturaData _facturaData;
+
+        public FacturaController(FacturaData facturaData)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            // Persistir la factura aquí (ejemplo: servicio o base de datos)
-            return CreatedAtAction(nameof(Get), new { id = 1 }, model);
+            _facturaData = facturaData;
         }
 
-        [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        [HttpPost]
+        public IActionResult Create(FacturaCreateDto dto)
         {
-            var factura = new FacturaModel { Id = id, ClienteNombre = "Cliente", Total = 100m };
-            return Ok(factura);
+            try
+            {
+                var factura = new Factura
+                {
+                    IdCliente = dto.ClienteId,
+                    IdMesero = dto.MeseroId,
+                    IdMesa = null,
+                    Fecha = dto.Fecha,
+                    Detalles = dto.Lineas.Select(l => new DetalleFactura
+                    {
+                        Plato = l.PlatoId,
+                        Cantidad = l.Cantidad,
+                        ValorUnitario = l.Precio
+                    }).ToList()
+                };
+
+                var id = _facturaData.CreateFactura(factura);
+                return Ok(new { nroFactura = id });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al crear factura: {ex.Message}");
+            }
         }
+    }
+
+    public class FacturaCreateDto
+    {
+        public int ClienteId { get; set; }
+        public int MeseroId { get; set; }
+        public DateTime Fecha { get; set; }
+        public List<FacturaLineaDto> Lineas { get; set; } = new();
+    }
+
+    public class FacturaLineaDto
+    {
+        public int PlatoId { get; set; }
+        public int Cantidad { get; set; }
+        public decimal Precio { get; set; }
     }
 }

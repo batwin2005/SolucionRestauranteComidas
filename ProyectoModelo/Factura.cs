@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace ProyectoModelo
+﻿namespace ProyectoModelo
 {
     public class Factura
     {
@@ -12,5 +9,12 @@ namespace ProyectoModelo
         public DateTime Fecha { get; set; }
         public decimal Total { get; set; }
         public List<DetalleFactura>? Detalles { get; set; }
+    }
+
+    public class DetalleFactura
+    {
+        public int Plato { get; set; }          // Id del plato
+        public int Cantidad { get; set; }
+        public decimal ValorUnitario { get; set; }
     }
 }
