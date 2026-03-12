@@ -85,6 +85,7 @@ namespace ProyectoWebApp.Controllers
                 {
                     clienteId = payload.ClienteId,
                     meseroId = payload.MeseroId,
+                    mesaId = payload.MesaId,  // <-- añadido
                     fecha = payload.Fecha,
                     lineas = payload.Lineas?.Select(l => new { platoId = l.PlatoId, cantidad = l.Cantidad, precio = l.Precio }).ToArray() ?? Array.Empty<object>()
                 };

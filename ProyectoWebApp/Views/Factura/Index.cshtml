@@ -26,6 +26,7 @@
                 <th>Fecha</th>
                 <th>Cliente</th>
                 <th>Mesero</th>
+                <th>Mesa</th> <!-- Añadido -->
                 <th>Total</th>
                 <th></th>
             </tr>
@@ -38,6 +39,7 @@
                 string fecha = "";
                 string cliente = "";
                 string mesero = "";
+                string mesa = "";  // Añadido
                 decimal total = 0m;
 
                 if (f.TryGetProperty("nroFactura", out var pNro) || f.TryGetProperty("id", out pNro) || f.TryGetProperty("idFactura", out pNro))
@@ -74,6 +76,11 @@
                     mesero = $"{mn ?? ""} {ma ?? ""}".Trim();
                 }
 
+                if (f.TryGetProperty("mesa", out var pMesa)) // Añadido
+                {
+                    mesa = pMesa.GetString() ?? ""; // Añadido
+                }
+
                 // calcular total por lineas si vienen
                 if (f.TryGetProperty("lineas", out var pLineas) && pLineas.ValueKind == JsonValueKind.Array)
                 {
@@ -91,6 +98,7 @@
                 <td>@fecha</td>
                 <td>@cliente</td>
                 <td>@mesero</td>
+                <td>@mesa</td> <!-- Añadido -->
                 <td>@total.ToString("C")</td>
                 <td>
                     <a class="btn btn-sm btn-secondary" href="/Factura/Create?facturaId=@nro">Editar</a>

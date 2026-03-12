@@ -1,18 +1,20 @@
+using System;
+using System.Collections.Generic;
+
 namespace ProyectoWebApp.Models
 {
     public class FacturaCreateViewModel
     {
         public int ClienteId { get; set; }
         public int MeseroId { get; set; }
+        public int? MesaId { get; set; }   // <-- añadido
         public DateTime Fecha { get; set; }
 
-        // Listas para poblar los combos en la vista
         public IEnumerable<Cliente>? Clientes { get; set; }
         public IEnumerable<Mesero>? Meseros { get; set; }
         public IEnumerable<Plato>? Platos { get; set; }
 
-        // Detalles de la factura
-        public List<FacturaLineaViewModel> Lineas { get; set; } = [];
+        public List<FacturaLineaViewModel> Lineas { get; set; } = new List<FacturaLineaViewModel>();
     }
 
     public class FacturaLineaViewModel

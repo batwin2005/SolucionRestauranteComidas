@@ -1,164 +1,32 @@
-@model ProyectoWebApp.Models.FacturaCreateViewModel
+
 @{
     ViewData["Title"] = "Crear Factura";
 }
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
 
-@functions {
-    private object? GetProp(object? obj, params string[] names)
-    {
-        if (obj == null) return null;
-        var t = obj.GetType();
-        foreach (var n in names)
-        {
-            var p = t.GetProperty(n);
-            if (p != null)
-            {
-                var val = p.GetValue(obj);
-                if (val != null) return val;
-            }
-        }
-        return null;
-    }
-
-    private int GetInt(object? obj, params string[] names)
-    {
-        var v = GetProp(obj, names);
-        if (v == null) return 0;
-        try { return Convert.ToInt32(v); }
-        catch { return 0; }
-    }
-
-    private string GetStr(object? obj, params string[] names)
-    {
-        var v = GetProp(obj, names);
-        return v?.ToString() ?? string.Empty;
-    }
-}
-
-<div class="container py-4">
-    <h2>Crear Factura</h2>
-
-    <form id="facturaForm">
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <label>Cliente</label>
-                <select id="clienteId" class="form-select">
-                    <option value="">-- Seleccione --</option>
-                    @foreach (var c in Model.Clientes ?? Enumerable.Empty<ProyectoWebApp.Models.Cliente>())
-                    {
-                        <option value="@c.ClienteId">@c.Nombres @c.Apellidos</option>
-                    }
-                </select>
-            </div>
-            <div class="col-md-6">
-                <label>Mesero</label>
-                <select id="meseroId" class="form-select">
-                    <option value="">-- Seleccione --</option>
-                    @foreach (var m in Model.Meseros ?? Enumerable.Empty<ProyectoWebApp.Models.Mesero>())
-                    {
-                        <option value="@m.IdMesero">@m.Nombres @m.Apellidos</option>
-                    }
-                </select>
-            </div>
-        </div>
-
-        <h5>Platos</h5>
-        <table class="table" id="lineasTable">
-            <thead>
-                <tr>
-                    <th>Plato</th><th>Cantidad</th><th>Precio</th><th></th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-
-        <div class="mb-3">
-            <button type="button" id="addLineaBtn" class="btn btn-primary">Agregar plato</button>
-        </div>
-
-        <div>
-            <button type="button" id="submitBtn" class="btn btn-success">Guardar Factura</button>
-            <a class="btn btn-secondary" asp-action="Index">Cancelar</a>
-        </div>
-    </form>
+<!-- (fragmento relevante: añadimos campo para Id Mesa) -->
+<div class="row mb-3">
+    <div class="col-md-4">
+        <label>Cliente</label>
+        <select id="clienteId" class="form-select">...</select>
+    </div>
+    <div class="col-md-4">
+        <label>Mesero</label>
+        <select id="meseroId" class="form-select">...</select>
+    </div>
+    <div class="col-md-4">
+        <label>Mesa (opcional)</label>
+        <input id="mesaId" type="number" min="0" class="form-control" placeholder="Id mesa (ej. 1)" />
+    </div>
 </div>
 
 <script>
-    // Serializa con opciones y escapa "</" para no romper el bloque <script>
-    const platos = @Html.Raw(
-        System.Text.Json.JsonSerializer
-            .Serialize(Model.Platos ?? System.Array.Empty<Plato>(),
-                       new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase })
-            .Replace("</", "<\\/")
-    );
+// al crear payload incluimos mesaId
+document.getElementById('submitBtn').addEventListener('click', async () => {
+    const clienteId = parseInt(document.getElementById('clienteId').value || '0');
+    const meseroId = parseInt(document.getElementById('meseroId').value || '0');
+    const mesaId = parseInt(document.getElementById('mesaId').value || '0') || null;
 
-    function createPlatoSelect() {
-        const select = document.createElement('select');
-        select.className = 'form-select plato-select';
-        select.innerHTML = '<option value="">--Seleccione--</option>';
-        for (const p of platos) {
-            const opt = document.createElement('option');
-            opt.value = (p.idPlato ?? p.id ?? p.idplato ?? 0);
-            opt.textContent = (p.nombre ?? p.nombrePlato ?? p.nombrePlato ?? p.nombreCompleto ?? '');
-            opt.dataset.precio = (p.precio ?? 0);
-            select.appendChild(opt);
-        }
-        return select;
-    }
-
-    document.getElementById('addLineaBtn').addEventListener('click', () => {
-        const tbody = document.querySelector('#lineasTable tbody');
-        const tr = document.createElement('tr');
-
-        const tdPlato = document.createElement('td');
-        tdPlato.appendChild(createPlatoSelect());
-
-        const tdCant = document.createElement('td');
-        const inputCant = document.createElement('input');
-        inputCant.type = 'number';
-        inputCant.min = 1;
-        inputCant.value = 1;
-        inputCant.className = 'form-control cantidad-input';
-        tdCant.appendChild(inputCant);
-
-        const tdPrecio = document.createElement('td');
-        const inputPrecio = document.createElement('input');
-        inputPrecio.type = 'number';
-        inputPrecio.step = '0.01';
-        inputPrecio.className = 'form-control precio-input';
-        inputPrecio.readOnly = true;
-        tdPrecio.appendChild(inputPrecio);
-
-        const tdAcc = document.createElement('td');
-        const btnDel = document.createElement('button');
-        btnDel.type = 'button';
-        btnDel.className = 'btn btn-danger btn-sm';
-        btnDel.textContent = 'Eliminar';
-        btnDel.addEventListener('click', () => tr.remove());
-        tdAcc.appendChild(btnDel);
-
-        tr.appendChild(tdPlato);
-        tr.appendChild(tdCant);
-        tr.appendChild(tdPrecio);
-        tr.appendChild(tdAcc);
-        tbody.appendChild(tr);
-
-        const selectElem = tdPlato.querySelector('select');
-        if (selectElem) {
-            selectElem.addEventListener('change', (e) => {
-                const sel = e.target;
-                const precio = sel.options[sel.selectedIndex].dataset.precio || 0;
-                inputPrecio.value = precio;
-            });
-        }
-    });
-
-    document.getElementById('submitBtn').addEventListener('click', async () => {
-        const clienteId = parseInt(document.getElementById('clienteId').value || '0');
-        const meseroId = parseInt(document.getElementById('meseroId').value || '0');
-
-          const lineas = [];
+    const lineas = [];
     document.querySelectorAll('#lineasTable tbody tr').forEach(tr => {
         const sel = tr.querySelector('.plato-select');
         const platoId = parseInt(sel ? sel.value || '0' : '0');
@@ -169,24 +37,25 @@
         }
     });
 
+    const payload = {
+        clienteId: clienteId,
+        meseroId: meseroId,
+        mesaId: mesaId,           // <-- añadido
+        fecha: new Date().toISOString(),
+        lineas: lineas
+    };
 
-        const payload = {
-            clienteId: clienteId,
-            meseroId: meseroId,
-            fecha: new Date().toISOString(),
-            lineas: lineas
-        };
-
-        const resp = await fetch('/Factura/Create', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        if (resp.redirected) {
-            window.location = resp.url;
-        } else {
-            alert('Error al crear factura');
-        }
+    const resp = await fetch('/Factura/Create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
     });
+
+    if (resp.redirected) {
+        window.location = resp.url;
+    } else {
+        const text = await resp.text();
+        alert('Error al crear factura: ' + resp.status + ' ' + text);
+    }
+});
 </script>
