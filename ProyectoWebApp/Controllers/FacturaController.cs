@@ -1,5 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 using ProyectoWebApp.Models;
+using System;
 
 namespace ProyectoWebApp.Controllers
 {
@@ -19,29 +26,36 @@ namespace ProyectoWebApp.Controllers
             return View(); // busca Views/Factura/Index.cshtml
         }
 
-        // GET Create: construye y devuelve el ViewModel esperado por la vista
+        // GET Create
         public async Task<IActionResult> Create()
         {
-            var vm = new FacturaCreateViewModel { Fecha = DateTime.Now, Clientes = (IEnumerable<Cliente>)[], Meseros = (IEnumerable<Mesero>)[], Platos = (IEnumerable<Plato>)[] };
+            var vm = new FacturaCreateViewModel
+            {
+                Fecha = DateTime.Now,
+                Clientes = Enumerable.Empty<Cliente>(),
+                Meseros = Enumerable.Empty<Mesero>(),
+                Platos = Enumerable.Empty<Plato>()
+            };
 
             try
             {
                 var client = _httpFactory.CreateClient("Api");
-                vm.Clientes = await client.GetFromJsonAsync<IEnumerable<Cliente>>("api/cliente") ?? [];
-                vm.Meseros = await client.GetFromJsonAsync<IEnumerable<Mesero>>("api/mesero") ?? [];
-                vm.Platos = await client.GetFromJsonAsync<IEnumerable<Plato>>("api/plato") ?? [];
+
+                vm.Clientes = await client.GetFromJsonAsync<IEnumerable<Cliente>>("api/cliente") ?? Enumerable.Empty<Cliente>();
+                vm.Meseros = await client.GetFromJsonAsync<IEnumerable<Mesero>>("api/mesero") ?? Enumerable.Empty<Mesero>();
+                vm.Platos = await client.GetFromJsonAsync<IEnumerable<Plato>>("api/plato") ?? Enumerable.Empty<Plato>();
             }
             catch (HttpRequestException ex)
             {
                 _logger.LogError(ex, "No se pudo conectar con la API para poblar el formulario de creación de factura.");
-                TempData["ErrorMessage"] = "No se pudo conectar con el servicio de API. Comprueba que el proyecto de API esté en ejecución y la URL en 'ApiBaseUrl'.";
+                TempData["ErrorMessage"] = "No se pudo conectar con el servicio de API. Comprueba que el proyecto de API esté en ejecución y la URL en 'ApiSettings:BaseUrl'.";
             }
 
             return View(vm);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] FacturaCreateViewModel payload)
+        public async Task<IActionResult> Create(FacturaCreateViewModel payload)
         {
             if (payload == null)
             {
@@ -53,7 +67,6 @@ namespace ProyectoWebApp.Controllers
             {
                 var client = _httpFactory.CreateClient("Api");
 
-                // Construir el objeto que espera la API (ajusta nombres si tu API difiere)
                 var apiPayload = new
                 {
                     clienteId = payload.ClienteId,

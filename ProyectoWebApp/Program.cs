@@ -1,65 +1,22 @@
-using ProyectoData;
+var builder = WebApplication.CreateBuilder(args);
 
-internal class Program
+// HttpClient con nombre "Api" usando configuración
+builder.Services.AddHttpClient("Api", client =>
 {
-    private static void Main(string[] args)
-    {
-        var builder = WebApplication.CreateBuilder(args);
-        builder.Services.AddControllersWithViews()
-#if DEBUG
-            .AddRazorRuntimeCompilation();
-#else
-    ;
-#endif
+    var baseUrl = builder.Configuration["ApiSettings:BaseUrl"];
+    client.BaseAddress = new Uri(baseUrl);
+});
 
-        builder.Services.AddHttpClient("Api", client =>
-        {
-            client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5071/");
-        });
+builder.Services.AddControllersWithViews();
 
-        builder.Services.AddScoped<ClienteData>();
-        builder.Services.AddScoped<MeseroData>();
-        builder.Services.AddScoped<PlatoData>();
-        builder.Services.AddScoped<FacturaData>();
-        builder.Services.AddScoped<ReportesData>();
+var app = builder.Build();
 
-        // Si necesitas CORS para que la WebApp consuma la API
-        builder.Services.AddCors(options =>
-        {
-            options.AddPolicy("AllowAll",
-                policy => policy.AllowAnyOrigin()
-                                .AllowAnyMethod()
-                                .AllowAnyHeader());
-        });
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
 
-        builder.Services.AddCors(options =>
-        {
-            options.AddDefaultPolicy(p => p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
-        });
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
-        var app = builder.Build();
-
-        if (!app.Environment.IsDevelopment())
-        {
-            app.UseExceptionHandler("/Home/Error");
-            app.UseHsts();
-        }
-
-        app.UseHttpsRedirection();
-        app.UseStaticFiles();
-        app.UseRouting();
-        app.UseCors();
-        app.UseAuthorization();
-
-        app.MapControllerRoute(
-            name: "default",
-            pattern: "{controller=Factura}/{action=Index}/{id?}");
-
-        app.Run();
-    }
-}
-
-#if DEBUG
-
-#else
-#endif
+app.Run();
