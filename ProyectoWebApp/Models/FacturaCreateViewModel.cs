@@ -7,9 +7,9 @@ namespace ProyectoWebApp.Models
         public DateTime Fecha { get; set; }
 
         // Listas para poblar los combos en la vista
-        public IEnumerable<object>? Clientes { get; set; }
-        public IEnumerable<object>? Meseros { get; set; }
-        public IEnumerable<object>? Platos { get; set; }
+        public IEnumerable<Cliente>? Clientes { get; set; }
+        public IEnumerable<Mesero>? Meseros { get; set; }
+        public IEnumerable<Plato>? Platos { get; set; }
 
         // Detalles de la factura
         public List<FacturaLineaViewModel> Lineas { get; set; } = new();
