@@ -1,12 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
 using ProyectoWebApp.Models;
-using System;
 
 namespace ProyectoWebApp.Controllers
 {
@@ -57,11 +50,7 @@ namespace ProyectoWebApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] FacturaCreateViewModel payload)
         {
-            if (payload == null || payload.ClienteId == 0 || payload.MeseroId == 0 || payload.Lineas == null || !payload.Lineas.Any())
-            {
-                TempData["ErrorMessage"] = "Datos de factura inválidos.";
-                return BadRequest();
-            }
+            
 
             try
             {
