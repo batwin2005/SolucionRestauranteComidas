@@ -10,7 +10,11 @@ namespace ProyectoData
     public class FacturaData
     {
         private readonly string _conn;
-        public FacturaData(IConfiguration config) => _conn = config.GetConnectionString("CadenaSQL");
+        public FacturaData(IConfiguration config)
+        {
+            _conn = config.GetConnectionString("CadenaSQL");
+        }
+
         // ProyectoData/FacturaData.cs (añadir estos métodos a la clase FacturaData existente)
         public void UpdateFactura(Factura factura)
         {
