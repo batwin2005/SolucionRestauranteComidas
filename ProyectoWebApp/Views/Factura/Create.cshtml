@@ -57,7 +57,7 @@
                     <option value="">-- Seleccione --</option>
                     @foreach (var m in Model.Meseros ?? Enumerable.Empty<ProyectoWebApp.Models.Mesero>())
                     {
-                        <option value="@m.MeseroId">@m.Nombres @m.Apellidos</option>
+                        <option value="@m.IdMesero">@m.Nombres @m.Apellidos</option>
                     }
                 </select>
             </div>
@@ -158,15 +158,17 @@
         const clienteId = parseInt(document.getElementById('clienteId').value || '0');
         const meseroId = parseInt(document.getElementById('meseroId').value || '0');
 
-        const lineas = [];
-        document.querySelectorAll('#lineasTable tbody tr').forEach(tr => {
-            const sel = tr.querySelector('.plato-select');
-            const platoId = parseInt(sel ? sel.value || '0' : '0');
-            const cantidad = parseInt(tr.querySelector('.cantidad-input').value || '1');
-            if (platoId > 0 && cantidad > 0) {
-                lineas.push({ platoId: platoId, cantidad: cantidad });
-            }
-        });
+          const lineas = [];
+    document.querySelectorAll('#lineasTable tbody tr').forEach(tr => {
+        const sel = tr.querySelector('.plato-select');
+        const platoId = parseInt(sel ? sel.value || '0' : '0');
+        const cantidad = parseInt(tr.querySelector('.cantidad-input').value || '1');
+        const precio = parseFloat(tr.querySelector('.precio-input').value || '0');
+        if (platoId > 0 && cantidad > 0) {
+            lineas.push({ platoId: platoId, cantidad: cantidad, precio: precio });
+        }
+    });
+
 
         const payload = {
             clienteId: clienteId,

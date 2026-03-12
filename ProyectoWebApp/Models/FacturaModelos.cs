@@ -9,16 +9,23 @@
 
     public class Mesero
     {
-        public int MeseroId { get; set; }
-        public string Nombres { get; set; }
-        public string Apellidos { get; set; }
+        public int IdMesero { get; set; }
+        public string? Nombres { get; set; }
+        public string? Apellidos { get; set; }
+        public int? Edad { get; set; }
+        public int? Antiguedad { get; set; }
+        public DateTime? FechaIngreso { get; set; }
+
     }
 
     public class Plato
     {
-        public int PlatoId { get; set; }
-        public string Nombre { get; set; }
+        public int IdPlato { get; set; }
+        public string? Nombre { get; set; }
+        public string? Descripcion { get; set; }
         public decimal Precio { get; set; }
+        public string? Categoria { get; set; }
+
     }
 
     public class FacturaCreateViewModels

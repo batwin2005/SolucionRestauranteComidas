@@ -32,9 +32,9 @@ namespace ProyectoWebApp.Controllers
             var vm = new FacturaCreateViewModel
             {
                 Fecha = DateTime.Now,
-                Clientes = Enumerable.Empty<Cliente>(),
-                Meseros = Enumerable.Empty<Mesero>(),
-                Platos = Enumerable.Empty<Plato>()
+                Clientes = [],
+                Meseros = [],
+                Platos = []
             };
 
             try
@@ -42,7 +42,7 @@ namespace ProyectoWebApp.Controllers
                 var client = _httpFactory.CreateClient("Api");
 
                 vm.Clientes = await client.GetFromJsonAsync<IEnumerable<Cliente>>("api/cliente") ?? Enumerable.Empty<Cliente>();
-                vm.Meseros = await client.GetFromJsonAsync<IEnumerable<Mesero>>("api/mesero") ?? Enumerable.Empty<Mesero>();
+                vm.Meseros = await client.GetFromJsonAsync<IEnumerable<Mesero>>("api/mesero") ?? Enumerable.Empty<Mesero>(); 
                 vm.Platos = await client.GetFromJsonAsync<IEnumerable<Plato>>("api/plato") ?? Enumerable.Empty<Plato>();
             }
             catch (HttpRequestException ex)

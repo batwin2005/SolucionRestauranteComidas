@@ -13,6 +13,8 @@ builder.Services.Configure<ConnectionStrings>(builder.Configuration.GetSection("
 
 
 //builder.Services.AddSingleton<ClienteData>();
+builder.Services.AddTransient<MeseroData>();
+builder.Services.AddTransient<PlatoData>();
 builder.Services.AddTransient<FacturaData>();
 builder.Services.AddTransient<ReportesData>();
 builder.Services.AddTransient<ClienteData>(); // si ya existe
